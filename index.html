@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShopNest - Home</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="logo"><img src="images/logo.svg" alt="ShopNest"/>ShopNest</div>
+      <div class="search-box">
+        <input id="searchInput" placeholder="Search products, brands, categories..." />
+        <button class="icon-btn" id="searchBtn">Search</button>
+      </div>
+      <div class="nav-links nav-actions">
+        <div id="navLinksPlaceholder"></div>
+        <button class="icon-btn">Wishlist <span id="wishCount">0</span></button>
+        <button class="icon-btn">Cart <span id="cartCount">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="left">
+        <h1>ShopNest — Your modern online store</h1>
+        <p>Discover curated products across electronics, fashion, home, and more. Fast shipping. Secure checkout.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="products.html">Shop Now</a>
+          <a class="btn btn-ghost" href="products.html">Explore</a>
+        </div>
+      </div>
+      <div class="right">
+        <img src="images/hero.svg" alt="hero" style="border-radius:12px;max-width:100%;box-shadow:var(--shadow)"/>
+      </div>
+    </section>
+
+    <section id="featured-products">
+      <div class="section-title">
+        <h2>Featured Products</h2>
+        <a href="products.html">View all</a>
+      </div>
+      <div id="products-grid"></div>
+      <div id="loading" class="loading">Loading products...</div>
+    </section>
+
+    <section id="categories">
+      <div class="section-title"><h2>Categories</h2><a href="products.html">See all</a></div>
+      <div class="categories">
+        <div class="category">Electronics</div>
+        <div class="category">Fashion</div>
+        <div class="category">Shoes</div>
+        <div class="category">Home &amp; Living</div>
+        <div class="category">Accessories</div>
+        <div class="category">Beauty</div>
+        <div class="category">Books</div>
+      </div>
+    </section>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+      const placeholderImages = [
+        'images/real-photos/photo1.jpg',
+        'images/real-photos/photo2.jpg',
+        'images/real-photos/photo3.jpg',
+        'images/real-photos/photo4.jpg',
+        'images/real-photos/photo5.jpg',
+        'images/real-photos/photo6.jpg'
+      ];
+
+      async function loadFeatured() {
+        const res = await api.get('/products?limit=8');
+        const grid = document.getElementById('products-grid');
+        const loading = document.getElementById('loading');
+        loading.style.display = 'none';
+        grid.innerHTML = '';
+        if (res && res.success && res.data.products.length) {
+          res.data.products.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'product-card';
+            el.innerHTML = `
+              <div class="product-media"><img src="${p.images && p.images.length ? p.images[0] : placeholderImages[Math.floor(Math.random()*placeholderImages.length)]}" alt="${p.name}" /></div>
+              <div class="product-info">
+                <h3 class="product-title">${p.name}</h3>
+                <div class="product-price">$${p.price.toFixed(2)}</div>
+                <div class="product-meta">
+                  <div class="text-muted">${p.brand || ''}</div>
+                  <div class="text-muted">${p.category}</div>
+                </div>
+                <div class="card-actions">
+                  <a class="btn btn-primary" href="product-details.html?id=${p._id}">View</a>
+                  <button class="btn btn-ghost" onclick="addToCart('${p._id}')">Add</button>
+                </div>
+              </div>
+            `;
+            grid.appendChild(el);
+          });
+        } else {
+          grid.innerHTML = '<div class="empty">No products found.</div>';
+        }
+      }
+
+      async function addToCart(productId){
+        const token = localStorage.getItem('token');
+        if (!token){ alert('Please login to add to cart'); return; }
+        const res = await api.post('/cart', { productId, quantity: 1 }, token);
+        if (res.success){ alert('Added to cart'); renderNavbar(); }
+        else alert(res.message || 'Could not add to cart');
+      }
+    </script>
+  </script>
+</body>
+</html>

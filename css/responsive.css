@@ -1,0 +1,7 @@
+/* Additional responsive tweaks (imported by main pages if needed) */
+@media (max-width:420px){
+  .logo{font-size:16px}
+  .search-box input{width:120px}
+  .hero h1{font-size:26px}
+  .hero p{font-size:14px}
+}
